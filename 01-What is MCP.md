@@ -58,7 +58,7 @@ MCP 采用**客户端-服务端架构**，其中 MCP 主机（Host）—— 如 
 2. **Client**：当 Claude 模型决定需要访问你的文件系统时，Host 中内置的 MCP Client 会被激活。这个 Client 负责与适当的 MCP Server 建立连接。
 3. **Server**：在这个例子中，文件系统 MCP Server 会被调用。它负责执行实际的文件扫描操作，访问你的桌面目录，并返回找到的文档列表。
 
-整个流程是这样的：你的问题 → Claude Desktop(Host) → Claude 模型 → 需要文件信息 → MCP Client 连接 → 文件系统 MCP Server → 执行操作 → 返回结果 → Claude 生成回答 → 显示在 Claude Desktop 上。
+整个流程是这样的：你的问题发送给MCP Host → Claude Desktop(Host) → Claude 模型 → 需要文件信息 → MCP Client 向Server请求 → 文件系统 MCP Server → 执行操作 → 返回结果 → Claude 生成回答 → 显示在 Claude Desktop 上。
 
 > 初次看到这个流程会产生疑问：LLM只有输出Text的能力，它是如何激活对应的Client的？
 >
