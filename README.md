@@ -75,21 +75,32 @@
 
 #### 1. 标准化与连接（理解“接口”）
 
-- **目标**：掌握 MCP，理解如何标准化地连接LLM。
+- 目标：掌握 MCP，理解如何标准化地连接LLM。
 - 学习内容：
-  - **MCP 协议**：阅读 Anthropic 的 MCP 官方文档，理解 Client-Host-Server 架构。
-  - **MCP Server 开发**：尝试写一个简单的 MCP Server（例如连接本地 SQLite 数据库）。
-  - **动手实践**：配置 LLM 连接你写的 MCP Server，直接在对话框里调用Tool。
+  - MCP 协议：阅读 Anthropic 的 MCP 官方文档，理解 Client-Host-Server 架构。
+  - ****MCP** Server 开发**：尝试写一个简单的 MCP Server（例如连接本地 SQLite 数据库）。
+  - 动手实践：配置 LLM 连接你写的 MCP Server，直接在对话框里调用Tool。
 
-#### 2. 思维框架（理解“流程”）
+#### 2. 记忆**系统（Memory）**
 
-- **目标**：掌握 ReAct 模式，让 Agent 能解决多步问题。
+- 目标：掌握如何设计、实现Agent的记忆能力。
+
 - 学习内容：
-  - **ReAct 论文/原理**：阅读相关博客，理解“观察-思考-行动”循环。
+  - 概念：短期记忆（对话窗口）、长期记忆（向量数据库）、记忆检索 / 更新 / 压缩；
+  - 技术：`FAISS/Chroma/Pinecone`、`LlamaIndex`索引。
+
+#### 3. 思维方式（理解“流程”）
+
+- 目标：掌握 ReAct 模式，让 Agent 能解决多步问题。
+- 学习内容：
+  - 概念：任务分解、子任务排序、状态跟踪、结果评估、自我修正
+  - 技术：ReAct 论文/原理：阅读相关博客，理解“观察-思考-行动”循环。
+
+#### 4. 综合实战（借助框架构建完整 Agent）
+
+- 目标：整合 Skill、Tool、ReAct，构建一个可用的 Agent。
+- 学习内容：
   - **LangChain 入门**：安装 LangChain，学习 `LangChain Agents` 模块。
   - **动手实践**：使用 LangChain 构建一个“数学助教”，它能调用计算器 Tool 解决复杂的数学应用题（例如：先算乘法，再算加法）。
 
-#### 3. 综合实战（构建完整 Agent）
-
-- **目标**：整合 Skill、Tool、ReAct，构建一个可用的 Agent。
 
