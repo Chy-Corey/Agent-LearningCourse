@@ -56,36 +56,26 @@ DEEPSEEK_MODEL=deepseek-chat
 
 第一步：初始化
 
-1. ****加载配置****：程序启动，`Configuration` 检查你的 API Key 是否存在。
-2. ****连接工具****：`MCPServer` 尝试启动并连接位于 `../weather/server.py` 的天气服务器。
+1. 加载配置：程序启动，`Configuration` 检查你的 API Key 是否存在。
+2. 连接工具：`MCPServer` 尝试启动并连接位于 `../weather/server.py` 的天气服务器。
 3. 建立对话：`MCPClient` 建立与 DeepSeek 的连接。
 
 第二步：分析与决策
 
 1. 你输入问题。
 
-2. ```
-   MCPClient
-   ```
-
-    将问题连同
-
-   系统提示词
-
-   （System Prompt）一起发送给 DeepSeek。
-
-   - *系统提示词的作用*：告诉 AI：“你是一个天气助手，你有两个工具可以用：`get_weather_warning`（查预警）和 `get_daily_forecast`（查预报）。”
+2. MCPClient将问题连同系统提示词（System Prompt）一起发送给 DeepSeek。系统提示词的作用：告诉 AI：“你是一个天气助手，你有两个工具可以用：`get_weather_warning`（查预警）和 `get_daily_forecast`（查预报）。”
 
 第三步：工具调用
 
 1. 模型思考：DeepSeek 分析你的问题，发现需要查数据。
-2. ****生成指令****：DeepSeek 返回一个 `finish_reason == "tool_calls"` 的响应，指示需要调用 `get_weather_warning` 函数，并传入参数 `{"city_id": "101010100"}`。
-3. ****执行任务****：`MCPClient` 接收到指令，通过 `MCPServer` 实际执行 `server.py` 中的代码去获取数据。
+2. 生成指令：DeepSeek 返回一个 `finish_reason == "tool_calls"` 的响应，指示需要调用 `get_weather_warning` 函数，并传入参数 `{"city_id": "101010100"}`。
+3. 执行任务：`MCPClient` 接收到指令，通过 `MCPServer` 实际执行 `server.py` 中的代码去获取数据。
 
 第四步：生成最终回复
 
 1. 结果回填：工具执行的结果（例如：“上海中心气象台发布暴雨橙色预警...”）被塞回对话历史。
-2. ****最终润色****：DeepSeek 再次被调用，这次它看到历史记录里已经有了数据，于是生成自然语言回复：“亲，上海今天发布了暴雨橙色预警，请注意防范！”
+2. 最终润色：DeepSeek 再次被调用，这次它看到历史记录里已经有了数据，于是生成自然语言回复：“亲，上海今天发布了暴雨橙色预警，请注意防范！”
 
 
 
