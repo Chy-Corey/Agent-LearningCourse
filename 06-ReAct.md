@@ -147,4 +147,10 @@ LangChain 将复杂的 AI 应用拆解为几个核心的标准化模块，开发
 4. **记忆系统 (Memory)**：这是 AI 的“笔记本”。它负责存储和管理对话历史，让 AI 在聊天时能够记住之前说过的话，实现流畅的多轮交互。
 5. **智能代理 (Agents)**：这是 AI 的“大脑”。它赋予了模型自主决策的能力。AI 可以根据用户的目标，自主判断并调用外部工具（如计算器、搜索引擎、API 接口）来完成任务。
 
+#### 2. 后续
+
 [快速入门 | LangChain 中文文档](https://langchain-doc.cn/v1/python/langchain/quickstart.html#创建并运行代理)
+
+我们已经理解了LangChain能做什么：集成、封装了Agent开发所需要的所有模块，比如Memory、Tool、Prompts等等。所以，如果我们想开发一个稳定、全面的Agent系统，就可以选择使用LangChain。
+
+后续会完整学习LangChain并进行项目实践。
