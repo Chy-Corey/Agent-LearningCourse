@@ -1,32 +1,14 @@
-## LangChain入门
+from dataclasses import dataclass
 
-通过之前的学习，我们了解到，一个Agent需要有以下组件：
-
-1. 对应的LLM模型：接入Agent的大模型，作为Agent的大脑；
-2. Tools：Agent可以使用的工具，作为Agent的手脚；
-3. Prompts：发送给LLM的提示词，作为Agent的人设与指令，告诉大脑“你是谁”以及“你要按什么规则办事”；
-4. Memory：Agent的记忆。
-
-这里的Prompts值得展开，Agent具有哪些tool，保存了什么记忆，以及没有列出的Skills、MCP Server等等，都是通过Prompts发送给LLM的。Agent 框架的底层工作，本质上就是在每次对话前，高效、精准地组装这些组件，构成一段“超级提示词”。
-
-在本章中，目标是展示使用LangChain开发一个幽默天气Agent的完整流程，因此我们只搭建以上四个组件，且结合代码学习。
-
-```python
-# 导入 dataclass 装饰器，用于快速定义带有默认值和类型提示的数据类（类似于定义数据结构）
-from dataclasses import dataclass  
-# 导入 LangChain 中用于创建智能体的核心工厂函数
 from langchain.agents import create_agent
-# 导入 tool 装饰器（把普通函数变成 AI 能用的工具）和 ToolRuntime（用于在工具中获取运行时上下文信息）
 from langchain.tools import tool, ToolRuntime
-# 导入内存型记忆存储器，用于保存对话的历史记录，让 AI 拥有“记忆”
 from langgraph.checkpoint.memory import InMemorySaver
-# 导入 DeepSeek 大语言模型的接口类
 from langchain_deepseek import ChatDeepSeek
-# 导入 dotenv 库，用于加载 .env 环境变量文件
-from dotenv import load_dotenv  
+from langchain.agents.middleware import wrap_tool_call
+from langchain_core.messages import ToolMessage
+from dotenv import load_dotenv
 
-
-# 加载环境变量中的DEEPSEEK_API_KEY
+# 加载环境变量中的api_key
 load_dotenv()
 
 # 定义系统提示词
@@ -55,19 +37,34 @@ def get_weather_for_location(city: str) -> str:
     """获取指定城市的天气。"""
     return f"{city}总是阳光明媚！"
 
-# 该工具为模拟获取用户地址
-# runtime是LangChain自动注入到tool的运行时对象
+
 @tool
 def get_user_location(runtime: ToolRuntime[Context]) -> str:
     """根据用户 ID 获取用户信息。"""
+    a = 10 / 0
     user_id = runtime.context.user_id
     return "Florida" if user_id == "1" else "SF"
 
 
+# 拦截中间件，将报错信息返回给模型
+@wrap_tool_call
+def handle_tool_errors(request, handler):
+    """使用自定义消息处理工具执行错误。"""
+    try:
+        return handler(request)
+    except Exception as e:
+        # 向模型返回自定义错误消息
+        print(request.tool_call["id"])
+        return ToolMessage(
+            content=f"工具错误：请检查您的输入并重试。({str(e)})",
+            tool_call_id=request.tool_call["id"]
+        )
+
+
 # 配置模型
 model = ChatDeepSeek(
-    model="deepseek-chat",	# 必须是LangChain支持的模型
-    temperature=0.5,
+    model="deepseek-chat",
+    temperature=2,
     max_tokens=2000,
     timeout=None,
     max_retries=3,
@@ -88,15 +85,15 @@ class ResponseFormat:
 
 
 # 设置记忆
-# 实例化一个内存型的记忆存储器，作为短期记忆，用来在多次对话中保存聊天记录
-# 大概流程为：每结束一次对话，存储对话信息；下一次在同一个对话ID发起对话时，携带保存的信息一起发送，实现多轮对话
+# 实例化一个内存型的记忆存储器，用来在多次对话中保存聊天记录
 checkpointer = InMemorySaver()
 
-# 创建agent，组合以上搭建的模块（model，prompt，tool，memory）
+# 创建agent
 agent = create_agent(
     model=model,
     system_prompt=SYSTEM_PROMPT,
     tools=[get_user_location, get_weather_for_location],
+    middleware=[handle_tool_errors],
     context_schema=Context,
     response_format=ResponseFormat,
     checkpointer=checkpointer
@@ -113,9 +110,10 @@ response = agent.invoke(
 )
 
 print(response['structured_response'])
-# ResponseFormat(punny_response='佛罗里达今天依旧是阳光灿烂，真是"阳"光普照，心情也跟着"光"彩照人！
-# 不过别忘了涂防晒，不然就要变成"佛罗里达烤人"了🌞😎', 
-# weather_conditions='Florida总是阳光明媚！')
+# ResponseFormat(
+#     punny_response="佛罗里达今天依然是'阳光灿烂'的一天！阳光正在播放'rey-dio'热门歌曲！我得说，这是进行'solar-bration'的完美天气！如果你希望下雨，恐怕这个想法已经'被冲走'了——预报仍然'清晰地'灿烂！",
+#     weather_conditions="佛罗里达总是阳光明媚！"
+# )
 
 # 注意，我们可以使用相同的 `thread_id` 继续对话。
 response = agent.invoke(
@@ -125,10 +123,7 @@ response = agent.invoke(
 )
 
 print(response['structured_response'])
-# ResponseFormat(punny_response='不客气！希望你的每一天都像佛罗里达的天气一样——"晴"天万里，"阳"光满溢！
-# 下次再找我聊天气，我保证"气"象万千，妙语连"珠"！😄🌤️', 
-# weather_conditions=None)
-```
-
-
-
+# ResponseFormat(
+#     punny_response="你真是'雷'厉风行地欢迎！帮助你保持'当前'天气总是'轻而易举'。我只是'云'游四方，等待随时'淋浴'你更多预报。祝你在佛罗里达的阳光下度过'sun-sational'的一天！",
+#     weather_conditions=None
+# )
